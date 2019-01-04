@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <div id="imgMedals">
+        
+    </div>
+    <script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/global.js"></script>
+<script>
+    
+     $(document).ready(function () {
+         getMedals();
+     })
+    
+    function getMedals() {
+			let imgUrl = serverURL + 'medals/image?fileName=';
+            $.ajax({
+                url: serverURL + 'medals',
+                method: 'GET',
+                dataType: 'json',
+                contentType: 'application/json',
+                complete: function (response) {
+                    $.each(response.responseJSON, function(key, value) {
+                        $('#imgMedals').append(
+                            `
+    
+                                        <img src="${value.image !== null ? (imgUrl + value.image) : ''}" width="150px">
+                                </tr>
+                            `
+                        );
+                    });
+                }
+            });
+        }            
+    
+    
+    </script>
+</body>
+</html>
