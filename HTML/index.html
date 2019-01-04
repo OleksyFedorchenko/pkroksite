@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+  <div id="add">
+  <form align="center" id='pop'>
+
+        <label style="font-weight: bold">Назва</label>
+        <input name="text" style="text-align: center" type="text" autofocus id="nameAdd">
+        <br>
+        <label style="font-weight: bold">Ціна</label>
+        <input name="text" type="number" value="0" min="0" max="100" step="0.001" id="priceAdd">
+        <br>
+        <label style="font-weight: bold">Малюнок</label>
+        <input name="file" type="file" id="descriptionAdd">
+        <br>
+        <input class="button" id="okAdd" type="Submit" value="OK">
+    </form>
+    </div>
+   <table id="medalsTable">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>Назва</th>
+            <th>Ціна</th>
+            <th>Малюнок</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/global.js"></script>
+<script>
+    
+     $(document).ready(function () {
+         getMedals();
+     })
+                
+    
+     $(document).on('click', '#medalsTable tbody button', function(e) {
+                    console.log(e.target.id);
+                    var r = confirm("Ви дійсно хочете видалити цей запис?");
+                    if (r == true) {
+                        let medalId = e.target.id.split('-')[1];
+                        deleteMedal(medalId);
+                    } 
+                });
+    
+     $('#pop').submit(function(e) {
+                    e.preventDefault();
+                    addMedal();
+                });
+    
+    
+     $(document).on('change', '#medalsTable tbody input', function(e) {
+                let elementId = e.target.id;
+                console.log(elementId);
+                let medalId = elementId.split('-')[1];
+                console.log(medalId);
+                uploadFile(medalId);
+                });
+    
+    function uploadFile(medalId) {
+            let formData = new FormData();
+            formData.append('file', $('#image-' + medalId)[0].files[0]);
+            $.ajax({
+                url: serverURL + 'medals/' + medalId + '/image',
+                method: 'POST',
+                contentType: false,
+                processData: false,
+                data: formData,
+                complete: function(res) {
+                    if (res.status == 202) {
+                        $('#medalsTable tbody').empty();
+                        getMedals();
+                    }
+                }
+            })
+        }
+
+    
+    
+    function deleteMedal(medalId) {
+            $.ajax({
+                url: serverURL + 'medals/' + medalId,
+                method: 'DELETE',
+                dataType: 'json',
+                contentType: 'application/json',
+                complete: function(res) {
+                    if (res.status == 200) {
+                        $('#medalsTable tbody').empty();
+                        getMedals();
+                    }
+                }
+            })
+        }
+    
+    
+    
+    function addMedal() {
+            let medal = {
+                name: $('#nameAdd').val(),
+                price: $('#priceAdd').val(),
+                isShow: true
+            }
+            $.ajax({
+                url: serverURL + 'medals',
+                method: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(medal),
+                complete: function(res) {
+                    console.log(res);
+                    if (res.status == 201) {
+                        alert('Medal added to DB');
+                        $('#medalsTable tbody').empty();
+                        getMedals();
+                        $('#pop')[0].reset();
+                    }
+                }
+            })
+        }
+    
+         function getMedals() {
+			let imgUrl = serverURL + 'medals/image?fileName=';
+            $.ajax({
+                url: serverURL + 'medals',
+                method: 'GET',
+                dataType: 'json',
+                contentType: 'application/json',
+                complete: function (response) {
+                    $.each(response.responseJSON, function(key, value) {
+                        $('#medalsTable tbody').append(
+                            `
+                                <tr>
+                                    <td>${value.id}</td>
+                                    <td>${value.name}</td>
+                                    <td>${value.price}</td>
+                                    <td>
+                                        <img src="${value.image !== null ? (imgUrl + value.image) : ''}" width="150px">
+                                    </td>
+                                    <td>
+                                        <input type="file" id="image-${value.id}">    
+                                    </td>
+                                    <td>
+                                        <button id="btn-${value.id}">Delete</button>
+                                    </td>
+                                </tr>
+                            `
+                        );
+                    });
+                }
+            });
+        }              
+                       
+                       
+    </script>
+</body>
+</html>

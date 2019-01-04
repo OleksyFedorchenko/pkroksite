@@ -45,4 +45,10 @@ public class MedalsServiceImpl implements MedalsService {
         medalsEntity.setImage(image);
         medalsRepository.save(medalsEntity);
     }
+
+    @Override
+    public void deleteMedalById(Long id) {
+        MedalsEntity medalsEntity = medalsRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Could not delete type with id[" + id + "]not found"));
+        medalsRepository.deleteById(id);
+    }
 }

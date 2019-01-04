@@ -10,4 +10,6 @@ public interface MedalsService {
     List<MedalsDTO> findAllOrderById();
 
     void addImageToProduct(String image, Long id);
+
+    void deleteMedalById(Long id);
 }

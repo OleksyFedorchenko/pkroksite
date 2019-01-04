@@ -39,9 +39,9 @@ public class MedalsController {
         return ResponseEntity.ok(medalsService.findAllOrderById());
     }
 
-    @PostMapping("{userId}/image")
+    @PostMapping("{medalId}/image")
     public ResponseEntity<?> uploadImage(
-            @PathVariable("userId") Long id,
+            @PathVariable("medalId") Long id,
             @RequestParam("file") MultipartFile file
     ) {
         if (FileUtil.isNotEmpty(file)) {
@@ -50,6 +50,12 @@ public class MedalsController {
             medalsService.addImageToProduct(file.getOriginalFilename(), id);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @DeleteMapping("{medalId}")
+    public ResponseEntity<?> deletePartById(@PathVariable("medalId") Long id) {
+        medalsService.deleteMedalById(id);
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     @GetMapping("image")
